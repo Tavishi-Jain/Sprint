@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEON//SPRINT — Tavishi × Atiksh</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+:root{
+ --bg:#050711;--panel:#0a0f1e;--panel2:#0d1426;--text:#eaf2ff;--muted:#7885a3;
+ --cyan:#00f0ff;--pink:#ff2bd6;--green:#7dff6a;--yellow:#ffe45e;--line:#182542;
+}
+*{box-sizing:border-box}body{margin:0;background:
+radial-gradient(circle at 15% 10%,rgba(0,240,255,.10),transparent 25%),
+radial-gradient(circle at 90% 20%,rgba(255,43,214,.10),transparent 25%),var(--bg);
+color:var(--text);font-family:Rajdhani,Arial,sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;
+background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+background-size:30px 30px}
+.wrap{max-width:1550px;margin:auto;padding:25px}
+.hero{border:1px solid rgba(0,240,255,.35);background:linear-gradient(135deg,rgba(8,17,35,.96),rgba(15,7,30,.94));
+padding:26px;border-radius:18px;box-shadow:0 0 35px rgba(0,240,255,.08)}
+.brand{font-family:Orbitron;font-size:13px;color:var(--cyan);letter-spacing:4px}
+h1{font-family:Orbitron;margin:8px 0;font-size:34px;text-shadow:0 0 16px rgba(0,240,255,.5)}
+.hero p{color:#aab7d0;margin:5px 0;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:22px}
+.stat{background:rgba(255,255,255,.035);border:1px solid var(--line);padding:15px;border-radius:12px}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.5px}
+.stat b{display:block;font-family:Orbitron;font-size:23px;margin-top:7px}
+.cyan{color:var(--cyan)}.pink{color:var(--pink)}.green{color:var(--green)}.yellow{color:var(--yellow)}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0}
+button{font-family:Rajdhani;font-weight:700;letter-spacing:.5px;border:1px solid var(--cyan);background:#07131d;color:var(--cyan);
+padding:9px 14px;border-radius:7px;cursor:pointer}button:hover{background:rgba(0,240,255,.12);box-shadow:0 0 15px rgba(0,240,255,.15)}
+button.danger{border-color:var(--pink);color:var(--pink)}
+.saved{margin-left:auto;color:var(--green);font-weight:700;align-self:center}
+.section{margin-top:22px}.section-title{font-family:Orbitron;font-size:17px;letter-spacing:2px;margin:0 0 11px}
+.section-title:before{content:"// ";color:var(--pink)}
+.table-wrap{background:rgba(8,13,27,.94);border:1px solid var(--line);border-radius:14px;overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:1400px}
+th{position:sticky;top:0;z-index:3;background:#0d162b;color:var(--cyan);text-align:left;padding:13px;font-family:Orbitron;font-size:10px;letter-spacing:1px}
+td{border-top:1px solid #111d35;padding:11px 12px;vertical-align:top}
+tr:hover{background:rgba(0,240,255,.025)}tr.today{background:rgba(255,228,94,.055)}
+.day{font-family:Orbitron;font-weight:700}.date{color:var(--muted);font-size:12px;margin-top:3px}
+.task{font-weight:700}.sub{font-size:12px;color:var(--muted);margin:2px 0 7px}
+input[type=checkbox]{appearance:none;width:20px;height:20px;border:1px solid #405172;background:#070c18;border-radius:4px;vertical-align:middle;cursor:pointer}
+input[type=checkbox]:checked{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px rgba(0,240,255,.65)}
+input[type=checkbox]:checked:after{content:"✓";display:block;color:#001016;font-weight:900;text-align:center;line-height:18px}
+.analytics{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:rgba(8,13,27,.94);border:1px solid var(--line);border-radius:14px;padding:17px}
+.card h3{font-family:Orbitron;font-size:13px;letter-spacing:1px;margin:0 0 13px}
+canvas{width:100%;height:260px;display:block;background:#070b17;border:1px solid #111d35;border-radius:10px}
+.heat{display:grid;grid-template-columns:repeat(30,1fr);gap:4px}
+.cell{aspect-ratio:1;border-radius:3px;background:#111a2b;border:1px solid #17233d;position:relative}
+.cell[data-level="1"]{background:#07545c}.cell[data-level="2"]{background:#008b96}.cell[data-level="3"]{background:#00c7d4;box-shadow:0 0 7px rgba(0,240,255,.35)}.cell[data-level="4"]{background:#7dff6a;box-shadow:0 0 9px rgba(125,255,106,.4)}
+.cell:hover:after{content:attr(title);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#050711;border:1px solid var(--cyan);padding:5px 7px;border-radius:5px;color:#fff;font-size:11px;z-index:9}
+.heat-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:6px}
+.bars{display:grid;gap:9px}.barrow{display:grid;grid-template-columns:70px 1fr 48px;gap:8px;align-items:center;font-size:12px}.track{height:9px;background:#111a2b;border-radius:20px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--pink),var(--cyan));box-shadow:0 0 10px rgba(0,240,255,.3)}
+textarea{width:100%;min-height:210px;resize:vertical;background:#060b17;color:#dce8ff;border:1px solid #20304d;border-radius:9px;padding:12px;font:600 15px Rajdhani;outline:none}
+textarea:focus{border-color:var(--pink);box-shadow:0 0 15px rgba(255,43,214,.12)}
+.idea-actions{display:flex;gap:8px;margin-top:8px}.small{font-size:12px;color:var(--muted)}
+footer{text-align:center;color:#53617d;margin:25px 0 5px;font-size:12px;letter-spacing:1px}
+@media(max-width:900px){.wrap{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}.analytics{grid-template-columns:1fr}h1{font-size:25px}.saved{width:100%;margin:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<div class="brand">NEON//SPRINT v3.0</div>
+<h1>⚡ TAVISHI × ATIKSH</h1>
+<p>30-DAY FULL STACK PROTOCOL · <b>16 SEP → 15 OCT 2026</b></p>
+<p>Personal projects continue through <b>30 OCT</b> · Ideas are stored in a separate vault.</p>
+<div class="stats">
+<div class="stat"><span>◈ Tavishi Full Stack</span><b class="cyan" id="tfs">0%</b></div>
+<div class="stat"><span>◈ Atiksh Full Stack</span><b class="pink" id="afs">0%</b></div>
+<div class="stat"><span>⌘ FoodCast</span><b class="green" id="tp">0%</b></div>
+<div class="stat"><span>⌁ Research + ArguFormer</span><b class="yellow" id="ap">0%</b></div>
+<div class="stat"><span>⚡ Joint FS Days</span><b id="joint">0/30</b></div>
+</div>
+</header>
+
+<div class="controls">
+<button onclick="markAll('tfs',true)">TAVISHI FS // ALL</button>
+<button onclick="markAll('afs',true)">ATIKSH FS // ALL</button>
+<button onclick="markAll('tp',true)">FOODCAST // ALL</button>
+<button onclick="markAll('ap',true)">ARGUFORMER // ALL</button>
+<button class="danger" onclick="clearAll()">RESET DATABASE</button>
+<span class="saved" id="saved">● CONNECTING…</span>
+</div>
+
+<section class="section">
+<div class="section-title">DAILY OPERATIONS</div>
+<div class="table-wrap"><table><thead><tr>
+<th>DAY / DATE</th><th>👩 TAVISHI · FULL STACK</th><th>👨 ATIKSH · FULL STACK</th><th>🍜 TAVISHI · FOODCAST</th><th>🤖 ATIKSH · RESEARCH + ARGUFORMER</th>
+</tr></thead><tbody id="rows"></tbody></table></div>
+</section>
+
+<section class="section">
+<div class="section-title">ACTIVITY HEATMAPS</div>
+<div class="analytics">
+<div class="card"><h3>👩 TAVISHI · DAILY ACTIVITY</h3><div class="heat" id="heatT"></div><div class="heat-labels"><span>16 SEP</span><span>15 OCT</span></div><p class="small">Brighter cells = more completed tasks that day.</p></div>
+<div class="card"><h3>👨 ATIKSH · DAILY ACTIVITY</h3><div class="heat" id="heatA"></div><div class="heat-labels"><span>16 SEP</span><span>15 OCT</span></div><p class="small">Brighter cells = more completed tasks that day.</p></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-title">PROGRESS TELEMETRY</div>
+<div class="analytics">
+<div class="card"><h3>📈 DAILY CUMULATIVE PROGRESS</h3><canvas id="chartDaily" width="900" height="260"></canvas></div>
+<div class="card"><h3>📊 WEEKLY PROGRESS</h3><div class="bars" id="weekly"></div><p class="small">Weekly completion = completed checklist items ÷ available checklist items for that week.</p></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-title">💡 IDEA VAULT · UNLIMITED ENTRIES</div>
+<div class="analytics">
+<div class="card"><h3>👩 TAVISHI'S HACKATHON / IDEATHON IDEAS</h3><textarea id="tavIdeas" placeholder="> IDEA_001&#10;> IDEA_002&#10;> IDEA_003&#10;&#10;Keep adding ideas here..."></textarea><div class="idea-actions"><span class="small">Auto-saved locally · no daily limit</span></div></div>
+<div class="card"><h3>👨 ATIKSH'S HACKATHON / IDEATHON IDEAS</h3><textarea id="atiIdeas" placeholder="> IDEA_001&#10;> IDEA_002&#10;> IDEA_003&#10;&#10;Keep adding ideas here..."></textarea><div class="idea-actions"><span class="small">Auto-saved locally · no daily limit</span></div></div>
+</div>
+</section>
+
+<footer>NEON//SPRINT · PROGRESS SYNCS LIVE VIA SUPABASE · BUILD SOMETHING REAL.</footer>
+</div>
+
+<script>
+const START=new Date(2026,8,16), DAYS=30;
+const types=["tfs","afs","tp","ap"];
+
+// ---- Supabase setup ----
+const SUPABASE_URL = "https://pndppvnstswxgjzrxjoo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZHBwdm5zdHN3eGdqenJ4am9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjQyNTMsImV4cCI6MjEwNTE0MDI1M30.tv_0Bqf85IVbZnZQA4o3Kr-e-P4yIdzcClDiDK1n8Ks";
+
+const sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+const ROOM_ID = "tavishi-atiksh-sprint-2026";
+
+let S = {};
+
+function dateFor(i){let d=new Date(START);d.setDate(START.getDate()+i);return d}
+function fmt(d){return d.toLocaleDateString("en-IN",{day:"2-digit",month:"short"})}
+
+async function save() {
+    const { error } = await sb
+        .from("sprint_state")
+        .upsert({
+            room_id: ROOM_ID,
+            state: S,
+            updated_at: new Date().toISOString()
+        });
+
+    if (error) {
+        console.error(error);
+        document.getElementById("saved").textContent = "⚠ SYNC ERROR";
+        return;
+    }
+
+    document.getElementById("saved").textContent = "● LIVE SYNC";
+}
+
+async function loadState() {
+    const { data, error } = await sb
+        .from("sprint_state")
+        .select("state")
+        .eq("room_id", ROOM_ID)
+        .maybeSingle();
+
+    if (error) {
+        console.error(error);
+        document.getElementById("saved").textContent = "⚠ LOAD ERROR";
+        return;
+    }
+
+    if (data) {
+        S = data.state || {};
+        hydrateUI();
+        render();
+    }
+
+    document.getElementById("saved").textContent = "● LIVE SYNC";
+}
+
+function hydrateUI() {
+    document.querySelectorAll("input[type=checkbox]").forEach(x => {
+        const key = x.dataset.t + "_" + x.dataset.d;
+        x.checked = !!S[key];
+    });
+
+    document.getElementById("tavIdeas").value =
+        S.tavIdeas || "";
+
+    document.getElementById("atiIdeas").value =
+        S.atiIdeas || "";
+}
+
+function count(t,n=DAYS){let x=0;for(let i=1;i<=n;i++)if(S[t+"_"+i])x++;return x}
+function pct(t){return Math.round(count(t)/DAYS*100)}
+
+const rows=document.getElementById("rows");
+for(let i=1;i<=DAYS;i++){
+ let d=dateFor(i-1),tr=document.createElement("tr");
+ if(d.toDateString()===new Date().toDateString())tr.className="today";
+ tr.innerHTML=`<td><div class="day">DAY_${String(i).padStart(2,"0")}</div><div class="date">${fmt(d)} 2026</div></td>
+ <td><div class="task">Full Stack Learning</div><div class="sub">Learn / practice / build</div><input type="checkbox" data-t="tfs" data-d="${i}"></td>
+ <td><div class="task">Full Stack Learning</div><div class="sub">Learn / practice / build</div><input type="checkbox" data-t="afs" data-d="${i}"></td>
+ <td><div class="task">FoodCast</div><div class="sub">Personal project work</div><input type="checkbox" data-t="tp" data-d="${i}"></td>
+ <td><div class="task">Research + ArguFormer</div><div class="sub">Paper reading and/or app work</div><input type="checkbox" data-t="ap" data-d="${i}"></td>`;
+ rows.appendChild(tr);
+}
+document.querySelectorAll("input[type=checkbox]").forEach(x=>{
+ x.onchange=()=>{
+   const k=x.dataset.t+"_"+x.dataset.d;
+   S[k]=x.checked;
+   save();
+   render();
+ }
+});
+const ti=document.getElementById("tavIdeas"),ai=document.getElementById("atiIdeas");
+ti.oninput=()=>{S.tavIdeas=ti.value;save()};ai.oninput=()=>{S.atiIdeas=ai.value;save()};
+
+function markAll(t,v){for(let i=1;i<=DAYS;i++)S[t+"_"+i]=v;document.querySelectorAll(`[data-t="${t}"]`).forEach(x=>x.checked=v);save();render()}
+
+async function clearAll() {
+    if (!confirm("RESET THE SHARED DATABASE FOR BOTH OF YOU?"))
+        return;
+
+    S = {};
+
+    hydrateUI();
+    render();
+
+    await save();
+}
+
+function render(){
+ document.getElementById("tfs").textContent=pct("tfs")+"%";document.getElementById("afs").textContent=pct("afs")+"%";
+ document.getElementById("tp").textContent=pct("tp")+"%";document.getElementById("ap").textContent=pct("ap")+"%";
+ let j=0;for(let i=1;i<=DAYS;i++)if(S["tfs_"+i]&&S["afs_"+i])j++;document.getElementById("joint").textContent=j+"/30";
+ renderHeat("heatT","tfs","tp","Tavishi");renderHeat("heatA","afs","ap","Atiksh");renderWeekly();drawChart();
+}
+function renderHeat(id,a,b,name){
+ let el=document.getElementById(id);el.innerHTML="";
+ for(let i=1;i<=DAYS;i++){let n=(S[a+"_"+i]?1:0)+(S[b+"_"+i]?1:0),c=document.createElement("div");c.className="cell";c.dataset.level=n*2;c.title=`${name} · Day ${i} · ${n}/2 tasks`;el.appendChild(c)}
+}
+function weekData(){
+ let arr=[];for(let w=0;w<5;w++){let st=w*6+1,en=Math.min((w+1)*6,DAYS),done=0,total=0;
+  for(let i=st;i<=en;i++)for(let t of types){total++;if(S[t+"_"+i])done++}
+  arr.push({label:"W"+(w+1),done,total,p:total?Math.round(done/total*100):0})
+ }return arr
+}
+function renderWeekly(){
+ let el=document.getElementById("weekly");el.innerHTML="";
+ weekData().forEach(w=>{let r=document.createElement("div");r.className="barrow";r.innerHTML=`<b>${w.label}</b><div class="track"><div class="bar" style="width:${w.p}%"></div></div><b>${w.p}%</b>`;el.appendChild(r)})
+}
+function drawChart(){
+ const c=document.getElementById("chartDaily"),ctx=c.getContext("2d"),W=c.width,H=c.height;
+ ctx.clearRect(0,0,W,H);ctx.font="12px Rajdhani";
+ ctx.strokeStyle="#17233d";ctx.fillStyle="#71809e";
+ for(let y=0;y<=100;y+=25){let yy=H-30-(y/100)*(H-50);ctx.beginPath();ctx.moveTo(40,yy);ctx.lineTo(W-15,yy);ctx.stroke();ctx.fillText(y+"%",8,yy+4)}
+ const series=[["tfs","Tavishi FS","#00f0ff"],["afs","Atiksh FS","#ff2bd6"]];
+ series.forEach(([t,label,col])=>{
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();
+  for(let i=1;i<=DAYS;i++){let p=countTo(t,i)/i*100,x=40+(i-1)*(W-55)/(DAYS-1),y=H-30-(p/100)*(H-50);i===1?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke();
+  ctx.fillStyle=col;ctx.fillText(label,55+(series.indexOf(series.find(s=>s[0]===t)))*150,18)
+ });
+}
+function countTo(t,n){let x=0;for(let i=1;i<=n;i++)if(S[t+"_"+i])x++;return x}
+
+// ---- Real-time sync ----
+sb
+    .channel("sprint-live")
+    .on(
+        "postgres_changes",
+        {
+            event: "*",
+            schema: "public",
+            table: "sprint_state",
+            filter: "room_id=eq.tavishi-atiksh-sprint-2026"
+        },
+        payload => {
+            if (payload.new && payload.new.state) {
+                S = payload.new.state;
+                hydrateUI();
+                render();
+            }
+        }
+    )
+    .subscribe();
+
+render();
+loadState();
+</script>
+</body>
+</html>
